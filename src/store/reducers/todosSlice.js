@@ -1,30 +1,10 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit";
+import axios from "axios";
 
 const todosSlice = createSlice({
   name: "todos",
   initialState: {
-    allTodos: [
-      {
-        id: 1,
-        title: "job 1",
-        completed: true,
-      },
-      {
-        id: 2,
-        title: "job 2",
-        completed: false,
-      },
-      {
-        id: 3,
-        title: "job 3",
-        completed: false,
-      },
-      {
-        id: 4,
-        title: "job 4",
-        completed: false,
-      },
-    ],
+    allTodos: [],
   },
 
   // kiểu dùng id bằng nanoid không có tính đoán biết được nên ko recomment sử dụng
@@ -65,8 +45,27 @@ const todosSlice = createSlice({
       const todoId = action.payload;
       state.allTodos = state.allTodos.filter((todo) => todo.id !== todoId);
     },
+
+    todosFetched(state, action) {
+      state.allTodos = action.payload;
+    },
   },
 });
+
+//async action creator
+export const getTodos = () => {
+  const getTodoAsync = async (dispatch) => {
+    try {
+      const response = await axios.get(
+        "https://jsonplaceholder.typicode.com/todos?_limit=15"
+      );
+      dispatch(todosFetched(response.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  return getTodoAsync;
+};
 
 //reducer
 const todosReducer = todosSlice.reducer;
@@ -76,7 +75,12 @@ export const todosSelector = (state) => state.todosReducer.allTodos;
 
 //export action
 
-export const { addTodo, markComplete, deleteTodo } = todosSlice.actions;
+export const {
+  addTodo,
+  markComplete,
+  deleteTodo,
+  todosFetched,
+} = todosSlice.actions;
 
 //export reducer
 export default todosReducer;
